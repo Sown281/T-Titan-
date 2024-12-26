@@ -1,4 +1,4 @@
-
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Sown281/T-Titan-/refs/heads/main/Source"))()
 -- Tự động chọn nhân vật
 local function autoSelectCharacter()
     local args = {
