@@ -56,26 +56,35 @@ Window:MakeTab({
 Window:MakeTextbox({
     Name = "HitBox Size",
     Default = tostring(DefaultSize),
-    TextDisappear = false,
+    TextDisappear = true,
     Callback = function(Value)
-        local size = tonumber(Value)
-        if size and size >= 0 then
-            number = size
-            _G.HeadSize = number
-            if number > 0 then
-                Config()
+        if Value ~= "" then
+            local size = tonumber(Value)
+            if size and size >= 0 then
+                number = size
+                _G.HeadSize = number
+                if number > 0 then
+                    Config()
+                else
+                    DefaultConfig()
+                end
             else
-                DefaultConfig()
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Error",
+                    Text = "Please enter a valid positive number!",
+                    Duration = 5
+                })
             end
         else
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Error",
-                Text = "Please enter a valid number!",
+                Text = "Textbox cannot be empty!",
                 Duration = 5
             })
         end
     end
 })
+
 
 Window:MakeButton({
     Name = "Reset to Default",
