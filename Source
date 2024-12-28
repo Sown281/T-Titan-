@@ -98,9 +98,10 @@ Window:AddButton({
 })
 
 Window:MakeTab({
-    Name = "Tab 1",
+    Name = "Credit",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
+Credit:AddLabel("script by King78")
 -- Load GUI
 OrionLib:Init()
