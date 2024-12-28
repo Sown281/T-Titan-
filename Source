@@ -54,7 +54,7 @@ Window:MakeTab({
     PremiumOnly = false
 })
 
-Window:MakeTextbox({
+Window:AddTextbox({
     Name = "HitBox Size",
     Default = tostring(DefaultSize),
     TextDisappear = true,
@@ -87,7 +87,7 @@ Window:MakeTextbox({
 })
 
 
-Window:MakeButton({
+Window:AddButton({
     Name = "Reset to Default",
     Callback = function()
         number = DefaultSize
