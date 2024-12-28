@@ -49,12 +49,12 @@ end
 
 -- Add GUI Elements
 Window:MakeTab({
-    Name = "Settings",
+    Name = "hitbox",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-Window:AddTextbox({
+hitbox:AddTextbox({
     Name = "HitBox Size",
     Default = tostring(DefaultSize),
     TextDisappear = true,
