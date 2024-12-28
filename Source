@@ -1,109 +1,96 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Sown281/T-Titan-/refs/heads/main/Source"))()
--- Tự động chọn nhân vật
-local function autoSelectCharacter()
-    local args = {
-        [1] = "012" -- Mã nhân vật (m có thể thay đổi)
-    }
-    game:GetService("ReplicatedStorage").Remotes.OnCharacterSelectTouchedRF:InvokeServer(unpack(args))
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+local Window = OrionLib:MakeWindow({Name = "HitBox GUI", HidePremium = false, SaveConfig = true, ConfigFolder = "HitBoxConfig"})
+
+local DefaultSize = 1
+local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart", 10)
+if humanoidRootPart then
+    DefaultSize = humanoidRootPart.Size.X
 end
 
--- Tự động cầm tool
-local function equipTool(toolName)
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    local Backpack = LocalPlayer:FindFirstChild("Backpack")
-    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local number = math.floor(DefaultSize)
+_G.HeadSize = DefaultSize
+_G.Disabled = false
 
-    if Backpack and Backpack:FindFirstChild(toolName) then
-        local Tool = Backpack:FindFirstChild(toolName)
-        Tool.Parent = Character
-    end
+local function UpdateNum()
+    print("Updated Number: " .. number)
 end
 
--- Chỉnh hitbox
-local function adjustHitbox(target, size)
-    if target:FindFirstChild("HumanoidRootPart") then
-        target.HumanoidRootPart.Size = size
-        target.HumanoidRootPart.Transparency = 0.5
-        target.HumanoidRootPart.CanCollide = false
-    end
-end
-
--- Tự động di chuyển đến gần cuối hitbox
-local function moveToBottomOfHitbox(target)
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-
-    if target and target:FindFirstChild("HumanoidRootPart") then
-        local TargetPosition = target.HumanoidRootPart.Position
-        local NewPosition = Vector3.new(TargetPosition.X, TargetPosition.Y - (400 / 2) - 2, TargetPosition.Z)
-
-        Character:MoveTo(NewPosition)
-    end
-end
-
--- Tấn công mục tiêu đến khi chết
-local function attackUntilDead(target)
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-
-    local Tool = Character:FindFirstChild("Saber") -- Tool tên là Saber
-    if Tool and Tool:FindFirstChild("Handle") then
-        local Handle = Tool.Handle
-        while target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 do
-            Handle.CFrame = target.HumanoidRootPart.CFrame
-            Tool:Activate()
-            wait(0.2) -- Delay giữa các đòn đánh
+local function Config()
+    for _, player in next, game:GetService("Players"):GetPlayers() do
+        if player.Name ~= game.Players.LocalPlayer.Name then
+            pcall(function()
+                local hrp = player.Character.HumanoidRootPart
+                hrp.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                hrp.Transparency = 0.4
+                hrp.BrickColor = BrickColor.new("Black")
+                hrp.Material = "Neon"
+                hrp.CanCollide = false
+            end)
         end
-    else
-        warn("Tool 'Saber' không được trang bị!")
     end
 end
 
--- Tìm người chơi gần nhất
-local function findClosestPlayer()
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    local Character = LocalPlayer.Character
-    local ClosestPlayer = nil
-    local ShortestDistance = math.huge
+local function DefaultConfig()
+    for _, player in next, game:GetService("Players"):GetPlayers() do
+        if player.Name ~= game.Players.LocalPlayer.Name then
+            pcall(function()
+                local hrp = player.Character.HumanoidRootPart
+                hrp.Size = Vector3.new(DefaultSize, DefaultSize, DefaultSize)
+                hrp.Transparency = 1
+                hrp.BrickColor = BrickColor.new("Medium stone grey")
+                hrp.Material = "Plastic"
+                hrp.CanCollide = true
+            end)
+        end
+    end
+end
 
-    if Character and Character:FindFirstChild("HumanoidRootPart") then
-        local LocalPosition = Character.HumanoidRootPart.Position
+-- Add GUI Elements
+Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local TargetPosition = player.Character.HumanoidRootPart.Position
-                local Distance = (LocalPosition - TargetPosition).Magnitude
-
-                if Distance < ShortestDistance then
-                    ShortestDistance = Distance
-                    ClosestPlayer = player
-                end
+Window:MakeTextbox({
+    Name = "HitBox Size",
+    Default = tostring(DefaultSize),
+    TextDisappear = false,
+    Callback = function(Value)
+        local size = tonumber(Value)
+        if size and size >= 0 then
+            number = size
+            _G.HeadSize = number
+            if number > 0 then
+                Config()
+            else
+                DefaultConfig()
             end
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Error",
+                Text = "Please enter a valid number!",
+                Duration = 5
+            })
         end
     end
+})
 
-    return ClosestPlayer
-end
-
--- Kết hợp tất cả
-local function executeAutomation(targetPlayer)
-    if targetPlayer and targetPlayer.Character then
-        autoSelectCharacter()
-        wait(1) -- Chờ nhân vật được chọn
-        equipTool("Saber") -- Cầm tool tên là Saber
-        adjustHitbox(targetPlayer.Character, Vector3.new(10, 400, 10)) -- Hitbox với trục Y là 400
-        moveToBottomOfHitbox(targetPlayer.Character) -- Di chuyển đến gần cuối hitbox
-        attackUntilDead(targetPlayer.Character) -- Tấn công đến khi mục tiêu chết
-    else
-        warn("Không tìm thấy người chơi gần nhất!")
+Window:MakeButton({
+    Name = "Reset to Default",
+    Callback = function()
+        number = DefaultSize
+        _G.HeadSize = number
+        DefaultConfig()
+        UpdateNum()
     end
-end
+})
 
--- Chạy tự động
-while wait(1) do -- Lặp lại mỗi 1 giây
-    local closestPlayer = findClosestPlayer()
-    if closestPlayer then
-        executeAutomation(closestPlayer)
-    end
-end
+Window:MakeTab({
+    Name = "Tab 1",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+-- Load GUI
+OrionLib:Init()
