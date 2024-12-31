@@ -34,3 +34,45 @@ Tab:AddToggle({
 	end    
 })
 
+local Tab1 = Window:MakeTab({
+	Name = "Hitbox",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+Tab1:AddTextbox({
+	Name = "X Y Z",
+	Default = nil,
+	TextDisappear = false,
+	Callback = function(Value)
+		print(Value)
+	end	  
+})
+
+Tab1:AddTextbox({
+	Name = "X",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		print(Value)
+	end	  
+})
+
+Tab1:AddTextbox({
+	Name = "Y",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		print(Value)
+	end	  
+})
+
+Tab1:AddTextbox({
+	Name = "Z",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		print(Value)
+	end	  
+})
+
