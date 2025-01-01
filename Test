@@ -1,0 +1,164 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Dang hoc toan@@", HidePremium = false, SaveConfig = false, ConfigFolder = "OrionTest"})
+
+local Tab = Window:MakeTab({
+	Name = "Main Tab",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+local Section = Tab:AddSection({
+	Name = "target"
+})
+
+Tab:AddDropdown({
+	Name = "Player in server",
+	Default = nil,
+	Options = {"1", "2"},
+	Callback = function(Value)
+		selectedPlayer = Value
+		print("Selected Player: " .. Value)
+	end    
+})
+
+local targetSelected = false
+local targetAll = false
+local flying = false
+local currentTarget = nil
+local targetIndex = 1
+
+-- Hàm bay phía trên người chơi
+local function flyAbove(player)
+	local character = game.Players.LocalPlayer.Character
+	if not character then return end
+
+	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	local targetCharacter = player.Character
+	if not targetCharacter then return end
+
+	local targetRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+	if not targetRootPart then return end
+
+	-- Bay trên đầu mục tiêu
+	local flyConnection
+	flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
+		if not flying or not targetCharacter.Parent then
+			flyConnection:Disconnect()
+			return
+		end
+		humanoidRootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 10, 0))
+	end)
+end
+
+-- Toggle "Target selected player"
+Tab:AddToggle({
+	Name = "Target selected player",
+	Default = false,
+	Callback = function(Value)
+		targetSelected = Value
+		flying = Value
+		if targetSelected and selectedPlayer then
+			local targetPlayer = game.Players:FindFirstChild(selectedPlayer)
+			if targetPlayer then
+				flyAbove(targetPlayer)
+			end
+		end
+	end    
+})
+
+-- Toggle "Target all"
+Tab:AddToggle({
+	Name = "Target all",
+	Default = false,
+	Callback = function(Value)
+		targetAll = Value
+		flying = Value
+
+		if targetAll then
+			local players = game.Players:GetPlayers()
+			coroutine.wrap(function()
+				while targetAll do
+					currentTarget = players[targetIndex]
+					if currentTarget then
+						flyAbove(currentTarget)
+						print("Flying above: " .. currentTarget.Name)
+					end
+					-- Chuyển sang người chơi tiếp theo sau 15 giây
+					task.wait(15)
+					targetIndex = (targetIndex % #players) + 1
+				end
+			end)()
+		end
+	end    
+})
+
+local Tab1 = Window:MakeTab({
+	Name = "Hitbox",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local hitboxSize = Vector3.new(1, 1, 1) -- Kích thước hitbox mặc định
+
+-- Hàm chỉnh kích thước hitbox
+local function adjustHitbox(player, size)
+	local character = player.Character
+	if not character then return end
+
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+	if not humanoidRootPart then return end
+
+	-- Thay đổi kích thước hitbox
+	humanoidRootPart.Size = size
+	humanoidRootPart.Transparency = 0.5 -- Để dễ thấy hitbox
+	humanoidRootPart.Material = Enum.Material.ForceField -- Tăng khả năng nhìn thấy hitbox
+end
+
+-- Lắng nghe các giá trị X, Y, Z
+Tab1:AddTextbox({
+	Name = "X",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		local x = tonumber(Value)
+		if x then
+			hitboxSize = Vector3.new(x, hitboxSize.Y, hitboxSize.Z)
+			print("Hitbox X: " .. x)
+		end
+	end	  
+})
+
+Tab1:AddTextbox({
+	Name = "Y",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		local y = tonumber(Value)
+		if y then
+			hitboxSize = Vector3.new(hitboxSize.X, y, hitboxSize.Z)
+			print("Hitbox Y: " .. y)
+		end
+	end	  
+})
+
+Tab1:AddTextbox({
+	Name = "Z",
+	Default = nil,
+	TextDisappear = true,
+	Callback = function(Value)
+		local z = tonumber(Value)
+		if z then
+			hitboxSize = Vector3.new(hitboxSize.X, hitboxSize.Y, z)
+			print("Hitbox Z: " .. z)
+		end
+	end	  
+})
+
+-- Áp dụng kích thước hitbox sau khi chỉnh sửa
+Tab1:AddButton({
+	Name = "Apply Hitbox",
+	Callback = function()
+		local player = game.Players.LocalPlayer
+		adjustHitbox(player, hitboxSize)
+		print("Hitbox adjusted to: " .. tostring(hitboxSize))
+	end
+})
