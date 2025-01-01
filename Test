@@ -117,7 +117,7 @@ end
 Tab1:AddTextbox({
 	Name = "X",
 	Default = nil,
-	TextDisappear = true,
+	TextDisappear = false,
 	Callback = function(Value)
 		local x = tonumber(Value)
 		if x then
@@ -130,7 +130,7 @@ Tab1:AddTextbox({
 Tab1:AddTextbox({
 	Name = "Y",
 	Default = nil,
-	TextDisappear = true,
+	TextDisappear = false,
 	Callback = function(Value)
 		local y = tonumber(Value)
 		if y then
@@ -143,7 +143,7 @@ Tab1:AddTextbox({
 Tab1:AddTextbox({
 	Name = "Z",
 	Default = nil,
-	TextDisappear = true,
+	TextDisappear = false,
 	Callback = function(Value)
 		local z = tonumber(Value)
 		if z then
